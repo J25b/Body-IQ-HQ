@@ -1,0 +1,9 @@
+{
+  "name": "bodyiq-hq",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private management console for Body IQ. Not part of the public application.",
+  "scripts": {
+    "build": "node scripts/generate-config.js"
+  }
+}

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BodyIQ HQ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/base.css">
+<link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+<div id="app">
+  <div class="boot-fallback">
+    <p>Loading BodyIQ HQ&hellip;</p>
+    <p class="boot-fallback-hint">
+      Stuck here? This app needs to be served over http(s), not opened directly as a local
+      file &mdash; browsers block module scripts from running via <code>file://</code>. Run a
+      local server (e.g. <code>npx serve .</code> or <code>python3 -m http.server</code>)
+      from this folder and open the printed <code>http://localhost&hellip;</code> address instead.
+    </p>
+  </div>
+</div>
+<noscript>BodyIQ HQ requires JavaScript to run.</noscript>
+
+<!-- Supabase JS client (UMD build) — exposes window.supabase.createClient -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- Chart.js — used only via the src/components/chart.js wrapper -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
