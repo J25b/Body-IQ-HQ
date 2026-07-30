@@ -1,11 +1,17 @@
+
 [build]
-  command = "node scripts/generate-config.js"
   publish = "."
+  command = ""
+
+
+#[build]
+#  command = "node scripts/generate-config.js"
+#  publish = "."
 
 # Safety net for any direct sub-path load (e.g. a bookmark) — the app itself
 # uses hash-based routing (#/login, #/dashboard), so this mainly guards
 # against a hard refresh on a non-root URL 404ing.
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+#[[redirects]]
+ # from = "/*"
+ # to = "/index.html"
+ # status = 200
