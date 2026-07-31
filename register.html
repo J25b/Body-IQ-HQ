@@ -18,7 +18,8 @@
     <h1 class="auth-title">Create your administrator account</h1>
     <p class="auth-subtitle">
       This should only be done once. Already have an account?
-      <a href="login.html">Go to the login page</a> instead.
+      <a href="login.html">Go to the login page</a> instead. Already registered and just
+      need the app? <a href="index.html">Open BodyIQ HQ</a>.
     </p>
 
     <p class="form-notice" id="already-exists-notice" hidden>
@@ -130,7 +131,8 @@
     }
 
     if (data.session) {
-      noticeEl.textContent = 'Administrator account created! Redirecting to your dashboard\u2026';
+      noticeEl.innerHTML = 'Administrator account created! Redirecting to your dashboard\u2026 ' +
+        'If nothing happens, <a href="index.html#/dashboard">click here</a>.';
       noticeEl.hidden = false;
       setTimeout(function () { window.location.href = 'index.html#/dashboard'; }, 1200);
     } else {
