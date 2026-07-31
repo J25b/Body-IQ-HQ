@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BodyIQ HQ — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/base.css">
+<link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <h1 class="auth-title">BodyIQ HQ</h1>
+    <p class="auth-subtitle">
+      Sign in to the management console. Don't have an account yet?
+      <a href="register.html">Create the administrator account</a>.
+    </p>
+    <form id="login-form" class="auth-form" novalidate>
+      <label>Email
+        <input type="email" name="email" required autocomplete="email" />
+      </label>
+      <label>Password
+        <input type="password" name="password" required autocomplete="current-password" />
+      </label>
+      <p class="form-error" id="login-error" hidden></p>
+      <button type="submit" class="btn-primary" id="login-submit">Sign in</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from './src/config.js';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  const form = document.getElementById('login-form');
+  const errorEl = document.getElementById('login-error');
+  const submitBtn = document.getElementById('login-submit');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    errorEl.hidden = true;
+
+    const fd = new FormData(form);
+    const email = fd.get('email').trim();
+    const password = fd.get('password');
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in\u2026';
+
+    const { error } = await sb.auth.signInWithPassword({ email: email, password: password });
+
+    if (error) {
+      errorEl.textContent = 'Incorrect email or password.';
+      errorEl.hidden = false;
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign in';
+      return;
+    }
+
+    window.location.href = 'index.html#/dashboard';
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BodyIQ HQ — Create Administrator Account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="src/styles/tokens.css">
+<link rel="stylesheet" href="src/styles/base.css">
+<link rel="stylesheet" href="src/styles/components.css">
+</head>
+<body>
+
+<div class="auth-shell">
+  <div class="auth-card">
+    <h1 class="auth-title">Create your administrator account</h1>
+    <p class="auth-subtitle">
+      This should only be done once. Already have an account?
+      <a href="login.html">Go to the login page</a> instead.
+    </p>
+
+    <p class="form-notice" id="already-exists-notice" hidden>
+      An administrator account already exists for this project.
+      <a href="login.html">Go to the login page</a> to sign in.
+    </p>
+
+    <form id="register-form" class="auth-form" novalidate>
+      <label>Full name
+        <input type="text" name="fullName" required autocomplete="name" />
+      </label>
+      <label>Email
+        <input type="email" name="email" required autocomplete="email" />
+      </label>
+      <label>Password
+        <input type="password" name="password" required minlength="8" autocomplete="new-password" />
+      </label>
+      <label>Confirm password
+        <input type="password" name="confirmPassword" required minlength="8" autocomplete="new-password" />
+      </label>
+      <p class="form-error" id="register-error" hidden></p>
+      <p class="form-notice" id="register-notice" hidden></p>
+      <button type="submit" class="btn-primary" id="register-submit">Create administrator account</button>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script type="module">
+  import { SUPABASE_URL, SUPABASE_ANON_KEY } from './src/config.js';
+
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { persistSession: true, autoRefreshToken: true }
+  });
+
+  const form = document.getElementById('register-form');
+  const errorEl = document.getElementById('register-error');
+  const noticeEl = document.getElementById('register-notice');
+  const submitBtn = document.getElementById('register-submit');
+
+  // Best-effort warning only — NOT the actual safety net. Even if this
+  // check fails to run (misconfigured project, schema not applied yet),
+  // the admins table's own RLS policy rejects a second insert regardless.
+  sb.rpc('has_admin').then(function (res) {
+    if (!res.error && res.data === true) {
+      document.getElementById('already-exists-notice').hidden = false;
+    }
+  }).catch(function () { /* ignore — this is just an early heads-up, not a gate */ });
+
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.hidden = false;
+    noticeEl.hidden = true;
+  }
+  function resetButton() {
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Create administrator account';
+  }
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    errorEl.hidden = true;
+    noticeEl.hidden = true;
+
+    const fd = new FormData(form);
+    const fullName = fd.get('fullName').trim();
+    const email = fd.get('email').trim();
+    const password = fd.get('password');
+    const confirmPassword = fd.get('confirmPassword');
+
+    if (password.length < 8) { showError('Password must be at least 8 characters.'); return; }
+    if (password !== confirmPassword) { showError('Passwords do not match.'); return; }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating account…';
+
+    const { data, error } = await sb.auth.signUp({ email: email, password: password });
+
+    if (error) {
+      showError(error.message);
+      resetButton();
+      return;
+    }
+    if (!data.user) {
+      showError('Something went wrong creating your account. Please try again.');
+      resetButton();
+      return;
+    }
+
+    const { error: insertError } = await sb.from('admins').insert({
+      id: data.user.id,
+      full_name: fullName,
+      email: email
+    });
+
+    if (insertError) {
+      // If this says something like "relation \"admins\" does not exist",
+      // it means supabase/schema.sql hasn't been run in your Supabase
+      // project yet — open the SQL editor there and run it, then retry.
+      showError(
+        'Your login was created, but the administrator record could not be saved (' +
+        insertError.message +
+        '). If an administrator already exists, use the login page instead. If this ' +
+        'mentions a missing table, you likely need to run supabase/schema.sql in your ' +
+        'Supabase project\u2019s SQL editor first.'
+      );
+      resetButton();
+      return;
+    }
+
+    if (data.session) {
+      noticeEl.textContent = 'Administrator account created! Redirecting to your dashboard\u2026';
+      noticeEl.hidden = false;
+      setTimeout(function () { window.location.href = 'index.html#/dashboard'; }, 1200);
+    } else {
+      noticeEl.textContent = 'Account created. Check your email to confirm your address, then sign in.';
+      noticeEl.hidden = false;
+      submitBtn.textContent = 'Account created';
+    }
+  });
+</script>
+
+</body>
+</html>
